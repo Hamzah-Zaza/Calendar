@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #calendar {
+            max-width: 300px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #calendar header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #calendar table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #calendar td {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        #calendar td:hover {
+            background-color: #f2f2f2;
+        }
+
+        .month-navigation button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #noteBox {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+<div id="calendar"></div>
+<div id="noteBox">
+    <h3>Note for <span id="selectedDate"></span></h3>
+    <textarea id="noteText" rows="4" cols="30"></textarea>
+    <button onclick="saveNote()">Save</button>
+    <button onclick="closeNoteBox()">Close</button>
+</div>
+
+<script>
+    var currentYear;
+    var currentMonth;
+    var notes = {};
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var now = new Date();
+        currentYear = now.getFullYear();
+        currentMonth = now.getMonth();
+
+        var calendarEl = document.getElementById('calendar');
+        renderCalendar(calendarEl);
+    });
+
+    function renderCalendar(container) {
+        var firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+        var lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+
+        var daysInMonth = lastDayOfMonth.getDate();
+        var startingDay = firstDayOfMonth.getDay();
+
+        var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        var table = '<header class="month-navigation">' +
+            '<button onclick="prevMonth()">Previous</button>' +
+            monthNames(currentMonth) + ' ' + currentYear +
+            '<button onclick="nextMonth()">Next</button>' +
+            '</header>';
+        table += '<table>';
+
+        // Create the header row with day names, excluding the 7th column (Saturday)
+        table += '<tr>';
+        for (var i = 0; i < days.length - 1; i++) {
+            table += '<td onclick="showNoteBox(' + (i + 1) + ')">' + days[i] + '</td>';
+        }
+        table += '</tr>';
+
+        // Create the days of the month, excluding the 7th column (Saturday)
+        var day = 1;
+        for (var i = 0; i < 6; i++) {
+            table += '<tr>';
+            for (var j = 0; j < 6; j++) {
+                if (i === 0 && j < startingDay) {
+                    table += '<td></td>';
+                } else if (day > daysInMonth) {
+                    break;
+                } else {
+                    var dateKey = currentYear + '-' + (currentMonth + 1) + '-' + day;
+                    table += '<td onclick="showNoteBox(' + day + ')" data-date="' + dateKey + '">' + day + '</td>';
+                    day++;
+                }
+            }
+            table += '</tr>';
+        }
+
+        table += '</table>';
+        container.innerHTML = table;
+    }
+
+    function monthNames(month) {
+        var months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        return months[month];
+    }
+
+    function prevMonth() {
+        if (currentMonth === 0) {
+            currentYear--;
+            currentMonth = 11;
+        } else {
+            currentMonth--;
+        }
+
+        renderCalendar(document.getElementById('calendar'));
+    }
+
+    function nextMonth() {
+        if (currentMonth === 11) {
+            currentYear++;
+            currentMonth = 0;
+        } else {
+            currentMonth++;
+        }
+
+        renderCalendar(document.getElementById('calendar'));
+    }
+
+</script>
+
+</body>
+</html>
